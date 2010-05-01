@@ -5,9 +5,13 @@
 % 
 % It isn't strictly required to put anything in here, as it will return
 % 'no_route' by default, at which point zerl will look for a controller that
-% automatically matches the first part of the requested path.  If none is found
-% or if the given controller doesn't have the a matching handler, a 404 will be
-% served up.
+% automatically matches the first part of the requested path.
+% 
+% If none is found or if the given controller doesn't have the a matching
+% handler, it searches for a (static) view that makes sense.  If one isn't
+% found it finally serves up a 404.  All of this is, of course, cached and
+% otherwise optimized, so feel free to leave this empty and default to views or
+% controllers.
 %
 
 -module(!project!.routes).
