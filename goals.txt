@@ -1,0 +1,44 @@
+
+Goals
+  - Simple and intuitive interface
+  - Production-ready as you go
+	- Easy and intuitive packaging for deployment elsewhere
+  - Hot code swapping for almost all project changes (minus upgrades to the
+	actual server- though possibly even then at some point).
+  - Support view->model->controller workflow
+    - Start with views and sample data
+	- Then move to model and controller
+  - Maintain internal consistency as project grows and files added ad-hoc
+  - Minimal empty/unused files (helpers, tests, etc.) that confuse the code
+	base.
+  - Super tight development iteration (most only available when server in dev
+	mode).
+    - No need for server restarts in development
+	- Very readable development server logging
+	- Mechisms for automatically reloading views as they (or their controllers)
+	  are modified.
+	- No caching issues
+  - Simplified model development
+    - SQL without the headaches
+	- MongoDB etc. without the headaches
+  - Super fast
+    - Minimal redirects
+	- Minimal connections opened by browser
+	- Minimal payload size
+	- Parallel loading of page elements
+	- Server production-ready
+	- Very simple proxy-server (e.g. nginx) tack-on
+	- Javascript, CSS, images all fully optimized
+  - Simplify common tasks
+    - Safe one-time posts (using intermediate page)
+	- Logging, warnings, alerts, errors
+	- Analytics
+	- Caching
+	- Cache invalidations (possible to calculate automatically?)
+	- A/B and multivariate testing
+  - Relatively easy framework add-ons
+  - Easy integrated testing
+  - Very easy i18n and localization
+
+Possible future stuff
+  - Fully integrated behaviors- basic part of workflow.

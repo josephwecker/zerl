@@ -4,7 +4,7 @@ zerl command-line
   - Connect to running server
   - (allow for relative project directory)
   - One-off commands sent to running server
-  - Generator - new controllers etc.
+  - Generator - new controllers etc. - with genuinely useful output messages
   - (allow to be used from anywhere in project, ideally.  so generate a new
 	controller from with the views directory, etc.  Also give warning [continue
 	y/n] if user tries to create a zerl project within another zerl project.
@@ -24,6 +24,9 @@ Project
 	* controllers
 	* static
 	* (models?)
+  - Mark when tests are to be run, and whether or not they are allowed to fail
+	currently (starts with yes, then when it is first complete switches to
+	not-allowed-to-fail)- strict actions are taken when a natf test fails.
 
 Server
   - Recompile / reload templates when necessary
@@ -34,13 +37,56 @@ Server
   - Javascript auto-refresh framer
   - Launch in different environments
   - Will serve up static if asked to, but issues a warning in production
+  - Automatic nginx configuration generation (from routes etc.)
   - Possibly immediately deploy new js etc., but then in the background compile
 	it and swap in the compiled when ready- for fast iterations + full
 	optimization...
+  - Command-line interface similar to what rake is used for in rails- that
+	basically does it with the running server.
+  - Static files using zml/zss as well.
+    - Probably compile to a .build directory as needed or on deploy?
+	- In which case...  automatically determine whether it's static or not?
+
+Redeploy
+  - Easy intuitive packaging
+  - Easy way to upgrade, etc.
+  - Step-by-step to bring it up on the new machine / other machine
+    - See if another instance is running or if port is taken
+	- Always good warnings / errors
+	- Dependency check
+	- Compilation
+	- (Config check?)
+	- Unit tests
+	- Behavior tests
+	- Instructions on how to start things up
 
 -----------
 routes
   - returns:
-  	- {static, Location}
+  	- {static_view, View}
 	- {controller, Controller, NewReqPath, NewReq}
+	- no_route
 
+controllers
+  - session handling automatic- easily recovered on server problem, persistent,
+	possibly cross-server, etc.
+  - everything is ready for associated view to render
+  - hand over to another controller / action (instead of http redirect,
+	ideally)
+  - quickly and easily set cookies, mime-type, etc.
+  - manually render partials etc.
+  - easily establish long-term connection handlers?  (websockets, streams...)
+  - obviously, easily launch background things
+
+
+------------------------
+zerl command-line
+zerl server
+  * server building and testing if necessary
+  * dependency processing
+  * compiling
+  * config parsing
+  * config execution
+  * web server started
+  * dependency monitoring (env. specific)
+  * hot code swapping
