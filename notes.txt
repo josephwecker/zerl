@@ -1,0 +1,46 @@
+zerl command-line
+  - Create new project skeleton
+  - Launch server in certain environment w or w/o console
+  - Connect to running server
+  - (allow for relative project directory)
+  - One-off commands sent to running server
+  - Generator - new controllers etc.
+  - (allow to be used from anywhere in project, ideally.  so generate a new
+	controller from with the views directory, etc.  Also give warning [continue
+	y/n] if user tries to create a zerl project within another zerl project.
+
+Project
+  - Convention over configuration, of course
+  - Standard layout
+    * config
+	  * routes
+	  * environment configs
+	  * (snames)
+	  * (which version of zerl created it)
+	  * (modules that must be loaded)
+	  * (applications to start)
+	  * (logging mechanisms & levels etc.)
+    * views
+	* controllers
+	* static
+	* (models?)
+
+Server
+  - Recompile / reload templates when necessary
+    - Automatically separates and puts into the correct directories
+	- Does any connection optimization that it needs to
+  - (External commands?  Like to reload templates...)
+  - Backend and frontend monitor
+  - Javascript auto-refresh framer
+  - Launch in different environments
+  - Will serve up static if asked to, but issues a warning in production
+  - Possibly immediately deploy new js etc., but then in the background compile
+	it and swap in the compiled when ready- for fast iterations + full
+	optimization...
+
+-----------
+routes
+  - returns:
+  	- {static, Location}
+	- {controller, Controller, NewReqPath, NewReq}
+
