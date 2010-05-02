@@ -2,8 +2,8 @@
 
 -define(SRC_DIR, "command-src").
 -define(CMD_SOURCES, [
-    "zerl",
-    "zerl_parse_opts"
+    zerl,
+    zerl_parse_opts
   ].
 
 -export([main/1]).
@@ -24,7 +24,8 @@ main(_) ->
     fun(S) ->
         ensure_compiled(S, LastModTimes, SrcDir, EBinDir)
     end, ?CMD_SOURCES),
-  Warnings = lists:flatten([Warns || {_, {_, _, Warns}} <- Compiled]),
+  Warnings = lists:flatten(
+    [Warns || {_, {_, _, Warns}} <- Compiled, Warns =/= nochange]),
   Errors = lists:flatten([Errs || {_, {error, Errs, _}} <- Compiled]),
   case Warnings of
     [] -> nice;
@@ -32,9 +33,14 @@ main(_) ->
   end,
   case Errors of
     [] ->
-      create_executable(EBinDir, BinDir,
-        [atom_to_list(MN)++".beam" || {_,{ok,MN,_}} <- Compiled],
-        "zerl");
+      case length([true||{_,{ok,_,nochange}}<-Compiled]) == length(Compiled) of
+        true -> nothing_to_do;
+        false ->
+          create_executable(EBinDir, BinDir,
+            [atom_to_list(MN)++".beam" || {_,{ok,MN,_}} <- Compiled],
+            "zerl"),
+          preserve_modtimes(ScriptDir, [{MN, MT} || {MT, {ok, MN,_}} <- Compiled])
+      end;
     E ->
       emit_errs("Errors", E),
       halt(1)
@@ -78,6 +84,10 @@ saved_modtimes(ScriptDir) ->
       []
   end.
 
+preserve_modtimes(ScriptDir, Vals) ->
+  MTFN = filename:join([ScriptDir, ".modtimes"]),
+  ok = file:write_file(MTFN, term_to_binary(Vals)).
+
 emit_errs(Kind, Errs) ->
   io:format(standard_error, "---------- ~s ----------\n", [Kind]),
   [emit_file_err(E) || E <- Errs],
@@ -99,7 +109,7 @@ emit_file_err({File, Errs}) ->
 % {ModifiedTime, {error, Errors, Warnings}}
 %
 ensure_compiled(Src, ModTimes, SrcDir, OutDir) ->
-  FName = [SrcDir, "/", Src, ".erl"],
+  FName = [SrcDir, "/", atom_to_list(Src), ".erl"],
   case {file:read_file_info(FName),
       proplists:get_value(Src, ModTimes, none),
       filelib:is_file([OutDir,"/",Src,".beam"])} of
@@ -109,14 +119,14 @@ ensure_compiled(Src, ModTimes, SrcDir, OutDir) ->
     {{error, Reason}, _, _} ->
       {none, {error, {cust, "Strange error " ++ atom_to_list(Reason) ++ " on file-  " ++
             lists:flatten(FName)}, []}};
-    {MT=#file_info.mtime, none, false} -> {MT, compiled(FName, OutDir)};
-    {_, ST, false} ->                     {ST, compiled(FName, OutDir)};
-    {MT=#file_info.mtime, none, _} ->     {MT, compiled(FName, OutDir)};
-    {MT=#file_info.mtime, ST, _} when ST >= MT -> {MT, {ok, Src, []}};
-    {_, ST, _} ->                         {ST, compiled(FName, OutDir)}
+    {{ok, FI}, _, false} ->    {FI#file_info.mtime, compiled(FName, OutDir)};
+    {{ok, FI}, none, _} ->     {FI#file_info.mtime, compiled(FName, OutDir)};
+    {{ok, FI}, ST, _} when ST >= FI#file_info.mtime -> {ST, {ok, Src, nochange}};
+    {{ok, FI}, _, _} ->        {FI#file_info.mtime, compiled(FName, OutDir)}
   end.
 
 compiled(File, OutDir) ->
+  io:format(standard_error, "Compiling ~s\n", [File]),
   compile:file(File, [
       debug_info,
       return,
