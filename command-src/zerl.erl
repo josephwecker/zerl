@@ -2,6 +2,15 @@
 
 -export([main/1]).
 
+-define(LAYOUT, [
+    {"./", ["README.md"]},
+    {"./behaviors", []},
+    {"./config", ["routes.erl"]},
+    {"./controllers", []},
+    {"./test", []},
+    {"./views", []}
+  ].
+
 main([Command | Rest]) ->
   command(list_to_atom(Command), Rest);
 main(_) ->
