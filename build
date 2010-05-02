@@ -1,0 +1,124 @@
+#!/usr/bin/env escript
+
+-define(SRC_DIR, "command-src").
+-define(CMD_SOURCES, [
+    "zerl",
+    "zerl_parse_opts"
+  ].
+
+-export([main/1]).
+
+% To avoid dependency with kernel.  Might need to rethink later.
+-record(file_info,
+  {size, type, access, atime, mtime, ctime, mode, links, major_device,
+    minor_device, inode, uid, gid}).
+
+main(_) ->
+  ScriptDir = filename:dirname(escript:script_name()),
+  LastModTimes = saved_modtimes(ScriptDir),
+  BinDir = filename:join([ScriptDir,"bin"]),
+  EBinDir = filename:join([ScriptDir,".cmd-ebin"]),
+  ok = ensure_dir(EBinDir),
+  SrcDir = filename:join([ScriptDir, ?SRC_DIR]),
+  Compiled = lists:map(
+    fun(S) ->
+        ensure_compiled(S, LastModTimes, SrcDir, EBinDir)
+    end, ?CMD_SOURCES),
+  Warnings = lists:flatten([Warns || {_, {_, _, Warns}} <- Compiled]),
+  Errors = lists:flatten([Errs || {_, {error, Errs, _}} <- Compiled]),
+  case Warnings of
+    [] -> nice;
+    W -> emit_errs("Warnings", W)
+  end,
+  case Errors of
+    [] ->
+      create_executable(EBinDir, BinDir,
+        [atom_to_list(MN)++".beam" || {_,{ok,MN,_}} <- Compiled],
+        "zerl");
+    E ->
+      emit_errs("Errors", E),
+      halt(1)
+  end.
+
+create_executable(EBinDir, BinDir, Beams, ExecName) ->
+  ok = ensure_dir(BinDir),
+
+  ZippedFN = BinDir ++ "/.tmp_zerl",
+  FinFN = BinDir ++ "/" ++ ExecName,
+  {ok, _} = zip:create(ZippedFN, Beams, [{cwd,EBinDir}, {uncompress, all}]),
+  {ok, Zipped} = file:open(ZippedFN, [read, binary, raw, read_ahead]),
+  {ok, Final} = file:open(FinFN, [write, binary]),
+  file:write(Final, <<"#!/usr/bin/env escript\n%%!\n">>),
+  {ok, _} = file:copy(Zipped, Final),
+  file:close(Zipped),
+  file:close(Final),
+  file:delete(ZippedFN),
+  make_exec(FinFN).
+
+make_exec(FName) ->
+  {ok, Inf} = file:read_file_info(FName),
+  Mode = Inf#file_info.mode bor 8#00010 bor 8#00100,
+  ok = file:write_file_info(FName, Inf#file_info{mode=Mode}).
+
+ensure_dir(D) ->
+  ok = filelib:ensure_dir(D),
+  case file:make_dir(D) of
+    ok -> ok;
+    {error, eexist} -> ok;
+    Other -> Other
+  end.
+
+saved_modtimes(ScriptDir) ->
+  MTFN = filename:join([ScriptDir, ".modtimes"]),
+  case filelib:is_file(MTFN) of
+    true ->
+      {ok, ModTimesBin} = file:read_file(MTFN),
+      binary_to_term(ModTimesBin);
+    false ->
+      []
+  end.
+
+emit_errs(Kind, Errs) ->
+  io:format(standard_error, "---------- ~s ----------\n", [Kind]),
+  [emit_file_err(E) || E <- Errs],
+  io:format(standard_error, "\n", []).
+emit_file_err({cust, Err}) ->
+  io:format(standard_error, "~s\n", [Err]);
+emit_file_err({File, Errs}) ->
+  [io:format(standard_error, "~s | Line ~p | ~s\n",[File, Ln,
+        Mod:format_error(Desc)]) || {Ln, Mod, Desc} <- Errs],
+  [io:format(standard_error, "~s | ~s\n",[File,
+        Mod:format_error(Desc)]) || {Mod, Desc} <- Errs].
+
+
+% Compiles file if the target doesn't exist or if the source has been modified
+% since it was last compiled.
+%
+% Returns one of:
+% {ModifiedTime, {ok, Name, Warnings}}
+% {ModifiedTime, {error, Errors, Warnings}}
+%
+ensure_compiled(Src, ModTimes, SrcDir, OutDir) ->
+  FName = [SrcDir, "/", Src, ".erl"],
+  case {file:read_file_info(FName),
+      proplists:get_value(Src, ModTimes, none),
+      filelib:is_file([OutDir,"/",Src,".beam"])} of
+    {{error, enoent}, _, _} ->
+      {none, {error, {cust, "Missing source file-  " ++ lists:flatten(FName)},
+          []}};
+    {{error, Reason}, _, _} ->
+      {none, {error, {cust, "Strange error " ++ atom_to_list(Reason) ++ " on file-  " ++
+            lists:flatten(FName)}, []}};
+    {MT=#file_info.mtime, none, false} -> {MT, compiled(FName, OutDir)};
+    {_, ST, false} ->                     {ST, compiled(FName, OutDir)};
+    {MT=#file_info.mtime, none, _} ->     {MT, compiled(FName, OutDir)};
+    {MT=#file_info.mtime, ST, _} when ST >= MT -> {MT, {ok, Src, []}};
+    {_, ST, _} ->                         {ST, compiled(FName, OutDir)}
+  end.
+
+compiled(File, OutDir) ->
+  compile:file(File, [
+      debug_info,
+      return,
+      {outdir, OutDir},
+      warn_unused_import]).
