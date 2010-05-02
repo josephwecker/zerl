@@ -33,7 +33,8 @@ main(_) ->
   end,
   case Errors of
     [] ->
-      case length([true||{_,{ok,_,nochange}}<-Compiled]) == length(Compiled) of
+      case (length([true||{_,{ok,_,nochange}}<-Compiled]) == length(Compiled))
+        and filelib:is_file([BinDir, "/zerl"]) of
         true -> nothing_to_do;
         false ->
           create_executable(EBinDir, BinDir,
