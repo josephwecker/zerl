@@ -1,5 +1,6 @@
 zerl command-line
   - Create new project skeleton
+    - Option to inline server or not?
   - Launch server in certain environment w or w/o console
   - Connect to running server
   - (allow for relative project directory)
@@ -81,6 +82,7 @@ controllers
 
 ------------------------
 zerl command-line
+
 zerl server
   * server building and testing if necessary
   * dependency processing
