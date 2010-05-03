@@ -3,7 +3,7 @@
 -define(SRC_DIR, "command-src").
 -define(CMD_SOURCES, [
     zerl,
-    zerl_parse_opts
+    prompts
   ].
 
 -export([main/1]).
@@ -55,7 +55,7 @@ create_executable(EBinDir, BinDir, Beams, ExecName) ->
   {ok, _} = zip:create(ZippedFN, Beams, [{cwd,EBinDir}, {uncompress, all}]),
   {ok, Zipped} = file:open(ZippedFN, [read, binary, raw, read_ahead]),
   {ok, Final} = file:open(FinFN, [write, binary]),
-  file:write(Final, <<"#!/usr/bin/env escript\n%%!\n">>),
+  file:write(Final, <<"#!/usr/bin/env escript\n%%! -noshell\n">>),
   {ok, _} = file:copy(Zipped, Final),
   file:close(Zipped),
   file:close(Final),
