@@ -3,7 +3,7 @@
 -define(SRC_DIR, "command-src").
 -define(CMD_SOURCES, [
     zerl,
-    prompts
+    clutil
   ].
 
 -export([main/1]).
