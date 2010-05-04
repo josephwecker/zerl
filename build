@@ -2,8 +2,8 @@
 
 -define(SRC_DIR, "command-src").
 -define(CMD_SOURCES, [
-    zerl,
-    clutil
+    clutil,
+    zerl
   ].
 
 -export([main/1]).
