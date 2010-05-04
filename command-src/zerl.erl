@@ -7,7 +7,8 @@
   cancel/0,
   stat/1, stat/2,
   make_dirp/1,
-  abort/2
+  abort/2,
+  script_dir/0
   ]).
 
 
@@ -67,7 +68,7 @@ is_in_project() ->
 initialize_project(Name, Options) ->
   stat("Creating new project ~s...", Name),
   create_layout(Name, Options,
-    filename:join([filename:dirname(escript:script_name()),"templates"]),
+    filename:join([script_dir(),"..","templates"]),
     ?LAYOUT),
   stat("Done.").
 

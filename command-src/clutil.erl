@@ -6,7 +6,8 @@
   estat/1, estat/2,
   abort/1, abort/2, abort/3,
   make_dirp/1,
-  promptyn/3, promptc/2
+  promptyn/3, promptc/2,
+  script_name/0, script_dir/0
   ]).
 
 cancel() ->
@@ -70,5 +71,19 @@ run_c(C, [{LookFor, RunFun} | T]) ->
   case lists:member(C, LookFor) of
     true -> RunFun(C);
     false -> run_c(C, T)
+  end.
+
+script_name() ->
+  follow_file(escript:script_name()).
+
+script_dir() ->
+  filename:dirname(script_name()).
+
+follow_file(CurrFile) ->
+  case file:read_link(CurrFile) of
+    {error, einval} -> CurrFile;
+    {error, enotsup} -> CurrFile;
+    {ok, NewFile} -> follow_file(NewFile);
+    Err -> Err
   end.
 
