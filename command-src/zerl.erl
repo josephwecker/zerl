@@ -52,7 +52,7 @@ command(_, _) ->
 
 usage() ->
   estat("Usage (NYI = Not Yet Implemented):
-    init           ProjectName (NYI)
+    init           ProjectName  - Sets up project in current directory
     new view       ViewName (NYI)
     new controller ControllerName (NYI)
     new model      ModelEntityName (NYI)
