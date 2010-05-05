@@ -3,6 +3,7 @@
 -define(SRC_DIR, "command-src").
 -define(CMD_SOURCES, [
     clutil,
+    rex,
     zerl
   ].
 
