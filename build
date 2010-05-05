@@ -5,7 +5,7 @@
     clutil,
     rex,
     zerl
-  ].
+  ]).
 
 -export([main/1]).
 

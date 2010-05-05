@@ -14,12 +14,28 @@
 
 
 -define(LAYOUT, [
-    {"./", ["README.md", {"zerl_project", ".zerl_project"}]},
-    {"./behaviors", [{"README.behaviors.md","README.md"}]},
-    {"./config", ["routes.erl", {"README.config.md", "README.md"}]},
-    {"./controllers", [{"README.controllers.md", "README.md"}]},
-    {"./test", [{"README.test.md", "README.md"}]},
-    {"./views", [{"README.views.md", "README.md"}]}
+    {"./",
+        ["dev.README.md",
+         {"zerl_project", ".zerl_project"}]},
+    {"./behaviors",
+        [{"README.behaviors.md", ".zerl-behaviors.README.md"}]},
+    {"./config",
+        ["routes.erl",
+         {"README.config.md", ".zerl-config.README.md"}]},
+    {"./controllers",
+        [{"README.controllers.md", ".zerl-controllers.README.md"}]},
+    {"./test",
+        [{"README.test.md", ".zerl-tests.README.md"}]},
+    {"./views",
+        [{"README.views.md", ".zerl-views.README.md"}]},
+    {"./views/shared/scripts",
+        [{"README.scripts.md", ".zerl-scripts.README.md"}]},
+    {"./views/shared/images",
+        [{"README.images.md", ".zerl-images.README.md"}]},
+    {"./views/shared/styles",
+        [{"README.styles.md", ".zerl-styles.README.md"}]},
+    {"./specials",
+        [{"README.specials.md", ".zerl-specials.README.md"}]}
   ].
 
 -define(S_INIT_DEEP,
