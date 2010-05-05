@@ -55,14 +55,18 @@ promptyn(Prompt, YesFun, NoFun) ->
      {"nN", fun(_) -> NoFun() end}]).
 
 promptc(Prompt, Cases) ->
-  case io:get_chars(Prompt, 1) of
+  Line = io:get_line(Prompt),
+  case Line of
     eof -> halt(3);
     {error, Reason} -> io:format(standard_error, "ERROR: ~p", [Reason]);
-    [C] ->
+    [C, $\n] ->
       case run_c(C, Cases) of
         '$X-PROMPTS-CHAR-NOT-FOUND' -> promptc(Prompt, Cases);
         RV -> RV
-      end
+      end;
+    UnRec ->
+      io:format(standard_error, "Unrecognized input: ~p", [UnRec]),
+      promptc(Prompt, Cases)
   end.
 
 run_c(_C, []) ->

@@ -8,7 +8,8 @@
   stat/1, stat/2,
   make_dirp/1,
   abort/2,
-  script_dir/0
+  script_dir/0,
+  promptyn/3
   ]).
 
 
@@ -37,9 +38,9 @@ main(_) ->
 
 command(init, [Name | Opts]) ->
   case is_in_project() of
-    deep -> prompts:if_promptyn(?S_INIT_DEEP,
+    deep -> promptyn(?S_INIT_DEEP,
         fun() -> initialize_project(Name, Opts) end, fun clutil:cancel/0);
-    root -> prompts:if_promptyn(?S_INIT_ROOT,
+    root -> promptyn(?S_INIT_ROOT,
         fun() -> refresh_project(Name, Opts) end, fun clutil:cancel/0);
     false ->
       initialize_project(Name, Opts)
@@ -89,11 +90,11 @@ create_files(PName, Opts, TmplDir, NewDir, [{SrcName, DstName} | T]) ->
   Dest = filename:join([NewDir, DstName]),
   Src = filename:join([TmplDir, SrcName]),
   case filelib:is_file(Src) of
-    false -> abort("Zerl templates seem to be missing (looking for ~s)", Src);
+    false -> abort("Zerl templates seem to be missing (looking for ~p)", Src);
     true ->
       case filelib:is_file(Dest) of
         true ->
-          prompts:if_promptyn(
+          promptyn(
             "File "++Dest++" already exists. Overwrite? (y/n): ",
             fun() -> create_file_from_tmpl(PName, Opts, Dest, Src) end,
             fun() -> estat("Skipping ~p", [Dest]) end);
@@ -108,4 +109,5 @@ create_files(PName, Opts, TmplDir, NewDir, [SrcDstName | T]) ->
 create_file_from_tmpl(PName, _Opts, Dest, Src) ->
   stat("Creating ~p", Dest),
   {ok, Tmpl} = file:read_file(Src),
-  ok = file:write_file(Dest, re:replace(Tmpl, "\!project\!", PName)).
+  ok = file:write_file(Dest, rex:replace_all(Tmpl, "\!project\!", PName)).
+
