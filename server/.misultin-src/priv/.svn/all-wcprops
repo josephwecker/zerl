@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 28
+/svn/!svn/ver/253/trunk/priv
+END
+test_certificate.pem
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/253/trunk/priv/test_certificate.pem
+END
+test_privkey.pem
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/253/trunk/priv/test_privkey.pem
+END
+README.txt
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/253/trunk/priv/README.txt
+END
